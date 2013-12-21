@@ -303,7 +303,7 @@ ssize_t pwm_value_store(struct device *dev,
 
 	return size;
 }
-static DEVICE_ATTR(pwm_value, S_IRUGO | S_IWUSR,
+static DEVICE_ATTR(pwm_value, S_IRUGO | S_IWUGO,
 		pwm_value_show, pwm_value_store);
 
 static ssize_t pwm_default_show(struct device *dev,
