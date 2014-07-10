@@ -805,6 +805,18 @@ ADJ_ATTR(r_adj);
 ADJ_ATTR(g_adj);
 ADJ_ATTR(b_adj);
 
+static ssize_t negative_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return accessibility_show(dev, attr, buf);
+}
+
+static ssize_t negative_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	return accessibility_store(dev, attr, buf, count);
+}
+
 static ssize_t show_rgb_adj_enable(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -845,6 +857,7 @@ static struct device_attribute mdnie_attributes[] = {
 	__ATTR(g_adj, 0666, show_g_adj, store_g_adj),
 	__ATTR(b_adj, 0666, show_b_adj, store_b_adj),
 	__ATTR(rgb_adj_enable, 0666, show_rgb_adj_enable, store_rgb_adj_enable),
+	__ATTR(negative, 0664, negative_show, negative_store),
 #endif
 	__ATTR_NULL,
 };
