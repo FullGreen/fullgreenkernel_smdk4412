@@ -28,7 +28,7 @@
 #include <linux/usb/hcd.h>
 #include <linux/usb/ehci_def.h>
 
-#ifdef CONFIG_SEC_MODEM_M0
+#ifdef CONFIG_MACH_KONA
 #include "../../../drivers/misc/modem_if/modem.h"
 #else
 #include <linux/platform_data/modem.h>
