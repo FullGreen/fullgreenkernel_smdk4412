@@ -977,7 +977,10 @@ static int register_root_hub(struct usb_hcd *hcd)
 	if (retval) {
 		dev_err (parent_dev, "can't register root hub for %s, %d\n",
 				dev_name(&usb_dev->dev), retval);
-	} else {
+	}
+	mutex_unlock(&usb_bus_list_lock);
+
+	if (retval == 0) {
 		spin_lock_irq (&hcd_root_hub_lock);
 		hcd->rh_registered = 1;
 		spin_unlock_irq (&hcd_root_hub_lock);
@@ -986,7 +989,6 @@ static int register_root_hub(struct usb_hcd *hcd)
 		if (HCD_DEAD(hcd))
 			usb_hc_died (hcd);	/* This time clean up */
 	}
-	mutex_unlock(&usb_bus_list_lock);
 
 	return retval;
 }
@@ -2217,7 +2219,9 @@ struct usb_hcd *usb_create_shared_hcd(const struct hc_driver *driver,
 			return NULL;
 		}
 		mutex_init(hcd->bandwidth_mutex);
+#if !defined(CONFIG_USB_EHCI_S5P) && !defined(USB_OHCI_S5P)		
 		dev_set_drvdata(dev, hcd);
+#endif		
 	} else {
 		hcd->bandwidth_mutex = primary_hcd->bandwidth_mutex;
 		hcd->primary_hcd = primary_hcd;

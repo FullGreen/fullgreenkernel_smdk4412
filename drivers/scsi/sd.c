@@ -52,6 +52,9 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/unaligned.h>
+#ifdef CONFIG_USB_HOST_NOTIFY
+#include <linux/kthread.h>
+#endif
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -138,7 +141,6 @@ sd_store_cache_type(struct device *dev, struct device_attribute *attr,
 	char *buffer_data;
 	struct scsi_mode_data data;
 	struct scsi_sense_hdr sshdr;
-	static const char temp[] = "temporary ";
 	int len;
 
 	if (sdp->type != TYPE_DISK)
@@ -146,13 +148,6 @@ sd_store_cache_type(struct device *dev, struct device_attribute *attr,
 		 * can do it, but there's probably so many exceptions
 		 * it's not worth the risk */
 		return -EINVAL;
-
-	if (strncmp(buf, temp, sizeof(temp) - 1) == 0) {
-		buf += sizeof(temp) - 1;
-		sdkp->cache_override = 1;
-	} else {
-		sdkp->cache_override = 0;
-	}
 
 	for (i = 0; i < ARRAY_SIZE(sd_cache_types); i++) {
 		len = strlen(sd_cache_types[i]);
@@ -166,13 +161,6 @@ sd_store_cache_type(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 	rcd = ct & 0x01 ? 1 : 0;
 	wce = ct & 0x02 ? 1 : 0;
-
-	if (sdkp->cache_override) {
-		sdkp->WCE = wce;
-		sdkp->RCD = rcd;
-		return count;
-	}
-
 	if (scsi_mode_sense(sdp, 0x08, 8, buffer, sizeof(buffer), SD_TIMEOUT,
 			    SD_MAX_RETRIES, &data, NULL))
 		return -EINVAL;
@@ -641,16 +629,9 @@ static int scsi_setup_flush_cmnd(struct scsi_device *sdp, struct request *rq)
 
 static void sd_unprep_fn(struct request_queue *q, struct request *rq)
 {
-	struct scsi_cmnd *SCpnt = rq->special;
-
 	if (rq->cmd_flags & REQ_DISCARD) {
 		free_page((unsigned long)rq->buffer);
 		rq->buffer = NULL;
-	}
-	if (SCpnt->cmnd != rq->cmd) {
-		mempool_free(SCpnt->cmnd, sd_cdb_pool);
-		SCpnt->cmnd = NULL;
-		SCpnt->cmd_len = 0;
 	}
 }
 
@@ -1458,6 +1439,21 @@ static int sd_done(struct scsi_cmnd *SCpnt)
 	if (rq_data_dir(SCpnt->request) == READ && scsi_prot_sg_count(SCpnt))
 		sd_dif_complete(SCpnt, good_bytes);
 
+	if (scsi_host_dif_capable(sdkp->device->host, sdkp->protection_type)
+	    == SD_DIF_TYPE2_PROTECTION && SCpnt->cmnd != SCpnt->request->cmd) {
+
+		/* We have to print a failed command here as the
+		 * extended CDB gets freed before scsi_io_completion()
+		 * is called.
+		 */
+		if (result)
+			scsi_print_command(SCpnt);
+
+		mempool_free(SCpnt->cmnd, sd_cdb_pool);
+		SCpnt->cmnd = NULL;
+		SCpnt->cmd_len = 0;
+	}
+
 	return good_bytes;
 }
 
@@ -2043,10 +2039,6 @@ sd_read_cache_type(struct scsi_disk *sdkp, unsigned char *buffer)
 	int old_rcd = sdkp->RCD;
 	int old_dpofua = sdkp->DPOFUA;
 
-
-	if (sdkp->cache_override)
-		return;
-
 	first_len = 4;
 	if (sdp->skip_ms_page_8) {
 		if (sdp->type == TYPE_RBC)
@@ -2135,9 +2127,14 @@ sd_read_cache_type(struct scsi_disk *sdkp, unsigned char *buffer)
 			}
 		}
 
-		sd_printk(KERN_ERR, sdkp, "No Caching mode page found\n");
-		goto defaults;
-
+		if (modepage == 0x3F) {
+			sd_printk(KERN_ERR, sdkp, "No Caching mode page "
+				  "present\n");
+			goto defaults;
+		} else if ((buffer[offset] & 0x3f) != modepage) {
+			sd_printk(KERN_ERR, sdkp, "Got wrong page\n");
+			goto defaults;
+		}
 	Page_found:
 		if (modepage == 8) {
 			sdkp->WCE = ((buffer[offset + 2] & 0x04) != 0);
@@ -2394,6 +2391,9 @@ static int sd_revalidate_disk(struct gendisk *disk)
 	 * react badly if we do.
 	 */
 	if (sdkp->media_present) {
+#ifdef CONFIG_USB_HOST_NOTIFY
+		disk->media_present = 1;
+#endif
 		sd_read_capacity(sdkp, buffer);
 
 		if (sd_try_extended_inquiry(sdp)) {
@@ -2494,6 +2494,105 @@ static int sd_format_disk_name(char *prefix, int index, char *buf, int buflen)
 	return 0;
 }
 
+#ifdef CONFIG_USB_HOST_NOTIFY
+static void sd_media_state_emit(struct scsi_disk *sdkp)
+{
+	struct gendisk *gd = sdkp->disk;
+	struct device *ddev = disk_to_dev(gd);
+	int idx = 0;
+	char *envp[3];
+
+	envp[idx++] = "DISC_MEDIA_CHANGE=1";
+	envp[idx++] = NULL;
+
+	kobject_uevent_env(&ddev->kobj, KOBJ_CHANGE, envp);
+}
+
+static void sd_scanpartition_async(void *data, async_cookie_t cookie)
+{
+	struct scsi_disk *sdkp = data;
+	struct block_device *bdev;
+	struct gendisk *gd = sdkp->disk;
+	struct device *ddev = disk_to_dev(gd);
+	struct disk_part_iter piter;
+	struct hd_struct *part;
+	int err;
+
+	/* delay uevents, until we scanned partition table */
+	dev_set_uevent_suppress(ddev, 1);
+
+	/* No minors to use for partitions */
+	if (!disk_partitionable(gd)) {
+		sd_printk(KERN_NOTICE, sdkp, "No disc partitions\n");
+		goto exit;
+	}
+	bdev = bdget_disk(gd, 0);
+	if (!bdev) {
+		sd_printk(KERN_NOTICE, sdkp, "bdget_disk, bdev is NULL\n");
+		goto exit;
+	}
+	bdev->bd_invalidated = 1;
+	err = blkdev_get(bdev, FMODE_READ, NULL);
+	if (err < 0) {
+		sd_printk(KERN_NOTICE, sdkp, "no media, delete partition\n");
+		disk_part_iter_init(&piter, gd, DISK_PITER_INCL_EMPTY);
+		while ((part = disk_part_iter_next(&piter)))
+			delete_partition(gd, part->partno);
+		disk_part_iter_exit(&piter);
+
+		check_disk_size_change(gd, bdev);
+		bdev->bd_invalidated = 0;
+		goto exit;
+	}
+	blkdev_put(bdev, FMODE_READ);
+
+exit:
+	/* announce disk after possible partitions are created */
+	dev_set_uevent_suppress(ddev, 0);
+
+	/* announce disk change state */
+	sd_media_state_emit(sdkp);
+
+	/* announce possible partitions */
+	disk_part_iter_init(&piter, gd, 0);
+	while ((part = disk_part_iter_next(&piter)))
+		kobject_uevent(&part_to_dev(part)->kobj, KOBJ_ADD);
+	disk_part_iter_exit(&piter);
+
+	sdkp->async_end = 1;
+	wake_up_interruptible(&sdkp->delay_wait);
+}
+
+static int sd_media_scan_thread(void *__sdkp)
+{
+	struct scsi_disk *sdkp = __sdkp;
+	int ret;
+	sdkp->async_end = 1;
+	sdkp->device->changed = 0;
+	while (!kthread_should_stop()) {
+		wait_event_interruptible_timeout(sdkp->delay_wait,
+			(sdkp->thread_remove && sdkp->async_end), 3*HZ);
+		if (sdkp->thread_remove && sdkp->async_end)
+			break;
+		ret = sd_check_events(sdkp->disk, 0);
+
+		if (sdkp->prv_media_present
+				!= sdkp->media_present) {
+			sd_printk(KERN_NOTICE, sdkp,
+				"sd_check_ret=%d prv_media=%d media=%d\n",
+					ret, sdkp->prv_media_present
+							, sdkp->media_present);
+			sdkp->disk->media_present = 0;
+			sdkp->async_end = 0;
+			async_schedule(sd_scanpartition_async, sdkp);
+			sdkp->prv_media_present = sdkp->media_present;
+		}
+	}
+	sd_printk(KERN_NOTICE, sdkp, "sd_media_scan_thread exit\n");
+	complete_and_exit(&sdkp->scanning_done, 0);
+}
+#endif
+
 /*
  * The asynchronous part of sd_probe
  */
@@ -2523,7 +2622,6 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 	sdkp->capacity = 0;
 	sdkp->media_present = 1;
 	sdkp->write_prot = 0;
-	sdkp->cache_override = 0;
 	sdkp->WCE = 0;
 	sdkp->RCD = 0;
 	sdkp->ATO = 0;
@@ -2540,8 +2638,16 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 		gd->flags |= GENHD_FL_REMOVABLE;
 		gd->events |= DISK_EVENT_MEDIA_CHANGE;
 	}
+#ifdef CONFIG_USB_HOST_NOTIFY
+	if (sdp->host->by_usb)
+		gd->interfaces = GENHD_IF_USB;
+	msleep(500);
+#endif
 
 	add_disk(gd);
+#ifdef CONFIG_USB_HOST_NOTIFY
+	sdkp->prv_media_present = sdkp->media_present;
+#endif
 	sd_dif_config_host(sdkp);
 
 	sd_revalidate_disk(gd);
@@ -2550,6 +2656,12 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 		  sdp->removable ? "removable " : "");
 	scsi_autopm_put_device(sdp);
 	put_device(&sdkp->dev);
+#ifdef CONFIG_USB_HOST_NOTIFY
+	if (sdp->host->by_usb) {
+		if (!IS_ERR(sdkp->th))
+			wake_up_process(sdkp->th);
+	}
+#endif
 }
 
 /**
@@ -2641,6 +2753,20 @@ static int sd_probe(struct device *dev)
 	get_device(dev);
 	dev_set_drvdata(dev, sdkp);
 
+#ifdef CONFIG_USB_HOST_NOTIFY
+	if (sdp->host->by_usb) {
+		init_waitqueue_head(&sdkp->delay_wait);
+		init_completion(&sdkp->scanning_done);
+		sdkp->thread_remove = 0;
+		sdkp->th = kthread_create(sd_media_scan_thread,
+				sdkp, "sd-media-scan");
+		if (IS_ERR(sdkp->th)) {
+			pr_err("Unable to start the device-scanning thread\n");
+			complete(&sdkp->scanning_done);
+		}
+	}
+#endif
+
 	get_device(&sdkp->dev);	/* prevent release before async_schedule */
 	async_schedule(sd_probe_async, sdkp);
 
@@ -2675,6 +2801,16 @@ static int sd_remove(struct device *dev)
 
 	sdkp = dev_get_drvdata(dev);
 	scsi_autopm_get_device(sdkp->device);
+
+#ifdef CONFIG_USB_HOST_NOTIFY
+	sdkp->disk->media_present = 0;
+	if (sdkp->device->host->by_usb) {
+		sdkp->thread_remove = 1;
+		wake_up_interruptible(&sdkp->delay_wait);
+		wait_for_completion(&sdkp->scanning_done);
+		sd_printk(KERN_NOTICE, sdkp, "scan thread kill success\n");
+	}
+#endif
 
 	async_synchronize_full();
 	blk_queue_prep_rq(sdkp->device->request_queue, scsi_prep_fn);
@@ -2833,6 +2969,10 @@ static int __init init_sd(void)
 	if (err)
 		goto err_out;
 
+	err = scsi_register_driver(&sd_template.gendrv);
+	if (err)
+		goto err_out_class;
+
 	sd_cdb_cache = kmem_cache_create("sd_ext_cdb", SD_EXT_CDB_SIZE,
 					 0, 0, NULL);
 	if (!sd_cdb_cache) {
@@ -2846,14 +2986,7 @@ static int __init init_sd(void)
 		goto err_out_cache;
 	}
 
-	err = scsi_register_driver(&sd_template.gendrv);
-	if (err)
-		goto err_out_driver;
-
 	return 0;
-
-err_out_driver:
-	mempool_destroy(sd_cdb_pool);
 
 err_out_cache:
 	kmem_cache_destroy(sd_cdb_cache);
@@ -2877,10 +3010,10 @@ static void __exit exit_sd(void)
 
 	SCSI_LOG_HLQUEUE(3, printk("exit_sd: exiting sd driver\n"));
 
-	scsi_unregister_driver(&sd_template.gendrv);
 	mempool_destroy(sd_cdb_pool);
 	kmem_cache_destroy(sd_cdb_cache);
 
+	scsi_unregister_driver(&sd_template.gendrv);
 	class_unregister(&sd_disk_class);
 
 	for (i = 0; i < SD_MAJORS; i++)

@@ -71,8 +71,6 @@ struct trace_iterator {
 	/* trace_seq for __print_flags() and __print_symbolic() etc. */
 	struct trace_seq	tmp_seq;
 
-	cpumask_var_t		started;
-
 	/* The below is zeroed out in pipe_read */
 	struct trace_seq	seq;
 	struct trace_entry	*ent;
@@ -84,7 +82,7 @@ struct trace_iterator {
 	loff_t			pos;
 	long			idx;
 
-	/* All new field here will be zeroed out in pipe_read */
+	cpumask_var_t		started;
 };
 
 
@@ -141,8 +139,10 @@ struct event_filter;
 enum trace_reg {
 	TRACE_REG_REGISTER,
 	TRACE_REG_UNREGISTER,
+#ifdef CONFIG_PERF_EVENTS
 	TRACE_REG_PERF_REGISTER,
 	TRACE_REG_PERF_UNREGISTER,
+#endif
 };
 
 struct ftrace_event_call;

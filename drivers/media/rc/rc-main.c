@@ -772,12 +772,9 @@ static ssize_t show_protocols(struct device *device,
 	if (dev->driver_type == RC_DRIVER_SCANCODE) {
 		enabled = dev->rc_map.rc_type;
 		allowed = dev->allowed_protos;
-	} else if (dev->raw) {
+	} else {
 		enabled = dev->raw->enabled_protocols;
 		allowed = ir_raw_get_allowed_protocols();
-	} else {
-		mutex_unlock(&dev->lock);
-		return -ENODEV;
 	}
 
 	IR_dprintk(1, "allowed - 0x%llx, enabled - 0x%llx\n",
@@ -1129,7 +1126,8 @@ out_table:
 out_dev:
 	device_del(&dev->dev);
 out_unlock:
-	mutex_unlock(&dev->lock);
+	if (mutex_is_locked(&dev->lock))
+		mutex_unlock(&dev->lock);
 	return rc;
 }
 EXPORT_SYMBOL_GPL(rc_register_device);
