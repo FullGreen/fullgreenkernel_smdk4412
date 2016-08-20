@@ -27,7 +27,6 @@
 #include "ump_kernel_memory_backend.h"
 #include "ump_kernel_memory_backend_os.h"
 #include "ump_kernel_memory_backend_dedicated.h"
-#include "ump_kernel_license.h"
 
 #include "ump_osk.h"
 #include "ump_ukk.h"
