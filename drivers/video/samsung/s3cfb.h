@@ -165,10 +165,6 @@ struct s3cfb_global {
 	struct fb_info		**fb;
 	struct s3cfb_vsync	vsync_info;
 
-	ktime_t      vsync_timestamp;
-	int      vsync_state;
-	struct task_struct  *vsync_thread;
-
 	atomic_t		enabled_win;
 	enum s3cfb_output_t	output;
 	enum s3cfb_rgb_mode_t	rgb_mode;
@@ -430,6 +426,9 @@ extern int s3cfb_set_window_protect(struct s3cfb_global *ctrl, int id, bool prot
 extern void s3c_fb_update_regs(struct s3cfb_global *fbdev, struct s3c_reg_data *regs);
 #ifdef CONFIG_FB_S5P_SYSMMU
 extern void s3cfb_clean_outer_pagetable(unsigned long vaddr, size_t size);
+#endif
+#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
+extern int s3cfb_wait_for_vsync(struct s3cfb_global *fbdev, u32 timeout);
 #endif
 
 /* LCD */

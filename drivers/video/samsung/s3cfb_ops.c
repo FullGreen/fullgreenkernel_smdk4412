@@ -1164,33 +1164,19 @@ int s3cfb_cursor(struct fb_info *fb, struct fb_cursor *cursor)
 	return 0;
 }
 
-int s3cfb_vsync_timestamp_changed(struct s3cfb_global *fbdev, ktime_t prev_timestamp)
-{
-	return !ktime_equal(prev_timestamp, fbdev->vsync_timestamp);
-}
-
+#if !defined(CONFIG_FB_S5P_VSYNC_THREAD)
 int s3cfb_wait_for_vsync(struct s3cfb_global *fbdev)
 {
-	ktime_t prev_timestamp;
-	int ret;
-
 	dev_dbg(fbdev->dev, "waiting for VSYNC interrupt\n");
 
-	prev_timestamp = fbdev->vsync_timestamp;
-
-	ret = wait_event_interruptible_timeout(fbdev->wq, 
-				s3cfb_vsync_timestamp_changed(fbdev, prev_timestamp),
-				msecs_to_jiffies(100));
-
-	if (ret == 0)
-		return -ETIMEDOUT;
-	if (ret < 0)
-		return ret;
+	sleep_on_timeout(&fbdev->wq, HZ / 10);
 
 	dev_dbg(fbdev->dev, "got a VSYNC interrupt\n");
 
-	return ret;
+	return 0;
 }
+#endif
+
 
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
 /**
@@ -1648,7 +1634,11 @@ void s3c_fb_update_regs(struct s3cfb_global *fbdev, struct s3c_reg_data *regs)
 
 	if (fbdev->support_fence == FENCE_SUPPORT) {
 	do {
-
+#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
+		s3cfb_wait_for_vsync(fbdev, HZ/10);
+#else
+		s3cfb_wait_for_vsync(fbdev);
+#endif
 		if (!fbdev->regs)
 			break;
 
@@ -2096,7 +2086,11 @@ int s3cfb_ioctl(struct fb_info *fb, unsigned int cmd, unsigned long arg)
 #endif
 #endif
 		/* Wait for Vsync */
+#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
+		s3cfb_wait_for_vsync(fbdev, HZ/10);
+#else
 		s3cfb_wait_for_vsync(fbdev);
+#endif
 		if (fbdev->regs == 0)
 			return 0;
 #if defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)
