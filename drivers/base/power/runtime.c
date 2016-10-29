@@ -360,6 +360,7 @@ static int rpm_suspend(struct device *dev, int rpmflags)
 		goto repeat;
 	}
 
+	dev->power.deferred_resume = false;
 	if (dev->power.no_callbacks)
 		goto no_callback;	/* Assume success. */
 
@@ -419,7 +420,6 @@ static int rpm_suspend(struct device *dev, int rpmflags)
 	wake_up_all(&dev->power.wait_queue);
 
 	if (dev->power.deferred_resume) {
-		dev->power.deferred_resume = false;
 		rpm_resume(dev, 0);
 		retval = -EAGAIN;
 		goto out;
@@ -533,7 +533,6 @@ static int rpm_resume(struct device *dev, int rpmflags)
 		    || dev->parent->power.runtime_status == RPM_ACTIVE) {
 			atomic_inc(&dev->parent->power.child_count);
 			spin_unlock(&dev->parent->power.lock);
-			retval = 1;
 			goto no_callback;	/* Assume success. */
 		}
 		spin_unlock(&dev->parent->power.lock);
@@ -611,7 +610,7 @@ static int rpm_resume(struct device *dev, int rpmflags)
 	}
 	wake_up_all(&dev->power.wait_queue);
 
-	if (retval >= 0)
+	if (!retval)
 		rpm_idle(dev, RPM_ASYNC);
 
  out:
@@ -747,7 +746,15 @@ int __pm_runtime_idle(struct device *dev, int rpmflags)
 	unsigned long flags;
 	int retval;
 
+	might_sleep_if(!(rpmflags & RPM_ASYNC));
+
 	if (rpmflags & RPM_GET_PUT) {
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+		if (!strcmp(dev_name(dev), "1-2"))
+			pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+					atomic_read(&dev->power.usage_count),
+					__builtin_return_address(0));
+#endif
 		if (!atomic_dec_and_test(&dev->power.usage_count))
 			return 0;
 	}
@@ -776,7 +783,15 @@ int __pm_runtime_suspend(struct device *dev, int rpmflags)
 	unsigned long flags;
 	int retval;
 
+	might_sleep_if(!(rpmflags & RPM_ASYNC) && !dev->power.irq_safe);
+
 	if (rpmflags & RPM_GET_PUT) {
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+		if (!strcmp(dev_name(dev), "1-2"))
+			pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+					atomic_read(&dev->power.usage_count),
+					__builtin_return_address(0));
+#endif
 		if (!atomic_dec_and_test(&dev->power.usage_count))
 			return 0;
 	}
@@ -804,8 +819,17 @@ int __pm_runtime_resume(struct device *dev, int rpmflags)
 	unsigned long flags;
 	int retval;
 
-	if (rpmflags & RPM_GET_PUT)
+	might_sleep_if(!(rpmflags & RPM_ASYNC) && !dev->power.irq_safe);
+
+	if (rpmflags & RPM_GET_PUT) {
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+		if (!strcmp(dev_name(dev), "1-2"))
+			pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+					atomic_read(&dev->power.usage_count),
+					__builtin_return_address(0));
+#endif
 		atomic_inc(&dev->power.usage_count);
+	}
 
 	spin_lock_irqsave(&dev->power.lock, flags);
 	retval = rpm_resume(dev, rpmflags);
@@ -959,6 +983,9 @@ int pm_runtime_barrier(struct device *dev)
 {
 	int retval = 0;
 
+#ifdef CONFIG_MDM_HSIC_PM
+	wake_up_all(&dev->power.wait_queue);
+#endif
 	pm_runtime_get_noresume(dev);
 	spin_lock_irq(&dev->power.lock);
 
@@ -993,6 +1020,7 @@ EXPORT_SYMBOL_GPL(pm_runtime_barrier);
  */
 void __pm_runtime_disable(struct device *dev, bool check_resume)
 {
+	might_sleep();
 	spin_lock_irq(&dev->power.lock);
 
 	if (dev->power.disable_depth > 0) {
@@ -1060,6 +1088,12 @@ void pm_runtime_forbid(struct device *dev)
 		goto out;
 
 	dev->power.runtime_auto = false;
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+	if (!strcmp(dev_name(dev), "1-2"))
+		pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+				atomic_read(&dev->power.usage_count),
+				__builtin_return_address(0));
+#endif
 	atomic_inc(&dev->power.usage_count);
 	rpm_resume(dev, 0);
 
@@ -1081,6 +1115,12 @@ void pm_runtime_allow(struct device *dev)
 		goto out;
 
 	dev->power.runtime_auto = true;
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+	if (!strcmp(dev_name(dev), "1-2"))
+		pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+				atomic_read(&dev->power.usage_count),
+				__builtin_return_address(0));
+#endif
 	if (atomic_dec_and_test(&dev->power.usage_count))
 		rpm_idle(dev, RPM_AUTO);
 
@@ -1148,6 +1188,12 @@ static void update_autosuspend(struct device *dev, int old_delay, int old_use)
 
 		/* If it used to be allowed then prevent it. */
 		if (!old_use || old_delay >= 0) {
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+			if (!strcmp(dev_name(dev), "1-2"))
+				pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+						atomic_read(&dev->power.usage_count),
+						__builtin_return_address(0));
+#endif
 			atomic_inc(&dev->power.usage_count);
 			rpm_resume(dev, 0);
 		}
@@ -1157,8 +1203,15 @@ static void update_autosuspend(struct device *dev, int old_delay, int old_use)
 	else {
 
 		/* If it used to be prevented then allow it. */
-		if (old_use && old_delay < 0)
+		if (old_use && old_delay < 0) {
+#if defined (CONFIG_TARGET_LOCALE_USA) && defined (CONFIG_MACH_T0_USA_VZW)
+			if (!strcmp(dev_name(dev), "1-2"))
+				pr_info("[MIF] %s, usage_count : %d by %pF\n", __func__,
+						atomic_read(&dev->power.usage_count),
+						__builtin_return_address(0));
+#endif
 			atomic_dec(&dev->power.usage_count);
+		}
 
 		/* Maybe we can autosuspend now. */
 		rpm_idle(dev, RPM_AUTO);
@@ -1198,6 +1251,8 @@ EXPORT_SYMBOL_GPL(pm_runtime_set_autosuspend_delay);
 void __pm_runtime_use_autosuspend(struct device *dev, bool use)
 {
 	int old_delay, old_use;
+
+	might_sleep();
 
 	spin_lock_irq(&dev->power.lock);
 	old_delay = dev->power.autosuspend_delay;

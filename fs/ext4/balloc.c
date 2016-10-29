@@ -378,7 +378,7 @@ static int ext4_has_free_blocks(struct ext4_sb_info *sbi,
 
 	free_blocks  = percpu_counter_read_positive(fbc);
 	dirty_blocks = percpu_counter_read_positive(dbc);
-	root_blocks = ext4_r_blocks_count(sbi->s_es);
+	root_blocks = atomic64_read(&sbi->s_r_blocks_count);
 
 	if (free_blocks - (nblocks + root_blocks + dirty_blocks) <
 						EXT4_FREEBLOCKS_WATERMARK) {
@@ -514,8 +514,7 @@ ext4_fsblk_t ext4_count_free_blocks(struct super_block *sb)
 		if (bitmap_bh == NULL)
 			continue;
 
-		x = ext4_count_free(bitmap_bh->b_data,
-				    EXT4_BLOCKS_PER_GROUP(sb) / 8);
+		x = ext4_count_free(bitmap_bh, sb->s_blocksize);
 		printk(KERN_DEBUG "group %u: stored = %d, counted = %u\n",
 			i, ext4_free_blks_count(sb, gdp), x);
 		bitmap_count += x;

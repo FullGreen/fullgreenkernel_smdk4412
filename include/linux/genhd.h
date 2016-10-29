@@ -128,6 +128,9 @@ struct hd_struct {
 #define GENHD_FL_EXT_DEVT			64 /* allow extended devt */
 #define GENHD_FL_NATIVE_CAPACITY		128
 #define GENHD_FL_BLOCK_EVENTS_ON_EXCL_WRITE	256
+#ifdef CONFIG_USB_HOST_NOTIFY
+#define GENHD_IF_USB	1
+#endif
 
 enum {
 	DISK_EVENT_MEDIA_CHANGE			= 1 << 0, /* media changed */
@@ -190,6 +193,10 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
+#ifdef CONFIG_USB_HOST_NOTIFY
+	int media_present;
+	int interfaces;
+#endif
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)
@@ -219,6 +226,12 @@ static inline void part_pack_uuid(const u8 *uuid_str, u8 *to)
 			continue;
 		}
 	}
+}
+
+static inline char *part_unpack_uuid(const u8 *uuid, char *out)
+{
+	sprintf(out, "%pU", uuid);
+	return out;
 }
 
 static inline int disk_max_parts(struct gendisk *disk)
