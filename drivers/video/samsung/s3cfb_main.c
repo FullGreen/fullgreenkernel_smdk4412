@@ -29,6 +29,7 @@
 #include <linux/memory.h>
 #include <linux/pm_runtime.h>
 #include <linux/delay.h>
+#include <linux/kthread.h>
 #include <linux/sw_sync.h>
 #include <plat/clock.h>
 #include <plat/media.h>
@@ -72,6 +73,8 @@ extern int gd2evf_power_ext(int onoff);
 extern int mdnie_update_ext(int mode);
 static bool current_mipi_lcd = true;
 #endif
+
+extern int s3cfb_vsync_timestamp_changed(struct s3cfb_global *fbdev, ktime_t prev_timestamp);
 
 struct s3cfb_fimd_desc		*fbfimd;
 
@@ -140,20 +143,12 @@ static irqreturn_t s3cfb_irq_frame(int irq, void *dev_id)
 	struct s3cfb_global *fbdev[2];
 	fbdev[0] = fbfimd->fbdev[0];
 
-	spin_lock(&fbdev[0]->vsync_slock);
-
 	if (fbdev[0]->regs != 0)
 		s3cfb_clear_interrupt(fbdev[0]);
 
-#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
-	fbdev[0]->vsync_info.timestamp = ktime_get();
-	wake_up_interruptible_all(&fbdev[0]->vsync_info.wait);
-#endif
-
 	fbdev[0]->wq_count++;
-	wake_up(&fbdev[0]->wq);
-
-	spin_unlock(&fbdev[0]->vsync_slock);
+	fbdev[0]->vsync_timestamp = ktime_get();
+	wake_up_interruptible(&fbdev[0]->wq);
 
 	return IRQ_HANDLED;
 }
@@ -183,40 +178,6 @@ int s3cfb_set_vsync_int(struct fb_info *info, bool active)
 		s3cfb_activate_vsync(fbdev);
 	else if (!active && prev_active)
 		s3cfb_deactivate_vsync(fbdev);
-
-	return 0;
-}
-
-/**
- * s3cfb_wait_for_vsync() - sleep until next VSYNC interrupt or timeout
- * @sfb: main hardware state
- * @timeout: timeout in msecs, or 0 to wait indefinitely.
- */
-int s3cfb_wait_for_vsync(struct s3cfb_global *fbdev, u32 timeout)
-{
-	ktime_t timestamp;
-	int ret;
-
-	pm_runtime_get_sync(fbdev->dev);
-
-	timestamp = fbdev->vsync_info.timestamp;
-	s3cfb_activate_vsync(fbdev);
-	if (timeout) {
-		ret = wait_event_interruptible_timeout(fbdev->vsync_info.wait,
-						!ktime_equal(timestamp,
-						fbdev->vsync_info.timestamp),
-						msecs_to_jiffies(timeout));
-	} else {
-		ret = wait_event_interruptible(fbdev->vsync_info.wait,
-						!ktime_equal(timestamp,
-						fbdev->vsync_info.timestamp));
-	}
-	s3cfb_deactivate_vsync(fbdev);
-
-	pm_runtime_put_sync(fbdev->dev);
-
-	if (timeout && ret == 0)
-		return -ETIMEDOUT;
 
 	return 0;
 }
@@ -407,28 +368,31 @@ static ssize_t vsync_event_show(struct device *dev,
 
 static DEVICE_ATTR(vsync_event, 0444, vsync_event_show, NULL);
 
-#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
 static int s3cfb_wait_for_vsync_thread(void *data)
 {
-	struct s3cfb_global *fbdev = data;
+    struct s3cfb_global *fbdev = data;
 
-	while (!kthread_should_stop()) {
-		ktime_t timestamp = fbdev->vsync_info.timestamp;
-		struct s3c_platform_fb *pdata = to_fb_plat(fbdev->dev);
+    while (!kthread_should_stop()) {
+        ktime_t prev_timestamp = fbdev->vsync_timestamp;
 
-		wait_event_interruptible(
-				fbdev->vsync_info.wait,
-				!ktime_equal(timestamp,
-				fbdev->vsync_info.timestamp) &&
-				fbdev->vsync_info.active);
+        int ret = wait_event_interruptible_timeout(fbdev->wq,
+                        s3cfb_vsync_timestamp_changed(fbdev, prev_timestamp),
+                        msecs_to_jiffies(100));
 
-		sysfs_notify(&fbdev->fb[pdata->default_win]->dev->kobj,
-				NULL, "vsync_event");
-	}
+        if (ret > 0) {
+            char *envp[2];
+            char buf[64];
 
-	return 0;
+            snprintf(buf, sizeof(buf), "VSYNC=%llu",
+            ktime_to_ns(fbdev->vsync_timestamp));
+            envp[0] = buf;
+            envp[1] = NULL;
+            kobject_uevent_env(&fbdev->dev->kobj, KOBJ_CHANGE, envp);
+        }
+    }
+
+    return 0;
 }
-#endif
 
 static void s3c_fb_update_regs_handler(struct kthread_work *work)
 {
@@ -1321,6 +1285,12 @@ static int s3cfb_probe(struct platform_device *pdev)
 		pdata->lcd_on(pdev);
 #endif
 
+	fbdev[0]->vsync_thread = kthread_run(s3cfb_wait_for_vsync_thread, fbdev[0], "s3cfb-vsync");
+	if (fbdev[0]->vsync_thread == ERR_PTR(-ENOMEM)) {
+		dev_err(fbdev[0]->dev, "failed to run vsync thread\n");
+		fbdev[0]->vsync_thread = NULL;
+	}
+
 	ret = device_create_file(&(pdev->dev), &dev_attr_win_power);
 	if (ret < 0)
 		dev_err(fbdev[0]->dev, "failed to add sysfs entries\n");
@@ -1395,10 +1365,9 @@ static int s3cfb_remove(struct platform_device *pdev)
 				framebuffer_release(fb);
 			}
 		}
-#if defined(CONFIG_FB_S5P_VSYNC_THREAD)
-		if (fbdev[i]->vsync_info.thread)
-			kthread_stop(fbdev[i]->vsync_info.thread);
-#endif
+
+		if (fbdev[i]->vsync_thread)
+			kthread_stop(fbdev[i]->vsync_thread);
 
 		kfree(fbdev[i]->fb);
 		kfree(fbdev[i]);
