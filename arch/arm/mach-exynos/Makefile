@@ -170,57 +170,67 @@ ifeq ($(CONFIG_MACH_M3),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o \
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o board-lcd-mipi.o
 else
 ifeq ($(CONFIG_MACH_T0),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o \
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+obj-$(CONFIG_FB_S5P_MIPI_DSIM)		+= board-lcd-mipi.o
 else
 ifeq ($(CONFIG_MACH_P4NOTE),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o\
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+obj-$(CONFIG_FB_S5P)			+= board-lcd-rgb.o
 else
 ifeq ($(CONFIG_MACH_TAB3),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o\
 					   board-midas-wlan.o \
 					   midas-camera.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+obj-$(CONFIG_FB_S5P_S6C1372)		+= board-lcd-rgb.o
+obj-$(CONFIG_FB_S5P_S6D7AA0)		+= board-lcd-mipi.o
 else
 ifeq ($(CONFIG_MACH_KONA),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o\
 					   board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
 					   midas-mhl.o \
-					   midas-wacom.o midas-lcd.o
+					   midas-wacom.o
+obj-$(CONFIG_FB_S5P_MIPI_DSIM)		+= board-lcd-mipi.o
 else
 ifeq ($(CONFIG_MACH_GD2),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o \
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+obj-$(CONFIG_FB_S5P_MIPI_DSIM)		+= board-lcd-mipi.o
 obj-$(CONFIG_FB_S5P_GD2EVF)		+= board-lcd-evf.o
 else
 ifeq ($(CONFIG_MACH_SP7160LTE),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o\
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+obj-$(CONFIG_FB_S5P)			+= board-lcd-rgb.o
 else
 ifeq ($(CONFIG_MACH_IPCAM),y)
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o \
 					   board-midas-wlan.o \
 					   midas-tsp.o \
 					   midas-camera.o \
-					   midas-thermistor.o midas-lcd.o
+					   midas-thermistor.o
+obj-$(CONFIG_FB_S5P_MIPI_DSIM)		+= board-lcd-mipi.o
 else
 obj-$(CONFIG_MIDAS_COMMON)		+= sec-common.o \
 					   midas-tsp.o board-midas-wlan.o \
 					   midas-camera.o midas-thermistor.o \
-					   midas-mhl.o midas-lcd.o
+					   midas-mhl.o
+
+obj-$(CONFIG_FB_S5P_MIPI_DSIM)		+= board-lcd-mipi.o
 endif
 endif
 endif
