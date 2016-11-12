@@ -768,6 +768,7 @@ static struct device_attribute mdnie_attributes[] = {
 void mdnie_early_suspend(struct early_suspend *h)
 {
 	struct mdnie_info *mdnie = container_of(h, struct mdnie_info, early_suspend);
+#if defined(CONFIG_FB_MDNIE_PWM)
 	struct lcd_platform_data *pd = NULL;
 	pd = mdnie->lcd_pd;
 
@@ -787,7 +788,7 @@ void mdnie_early_suspend(struct early_suspend *h)
 		pd->power_on(NULL, 0);
 
 	dev_info(mdnie->dev, "-%s\n", __func__);
-
+#endif
 	return ;
 }
 
@@ -795,6 +796,7 @@ void mdnie_late_resume(struct early_suspend *h)
 {
 	u32 i;
 	struct mdnie_info *mdnie = container_of(h, struct mdnie_info, early_suspend);
+#if defined(CONFIG_FB_MDNIE_PWM)
 	struct lcd_platform_data *pd = NULL;
 
 	dev_info(mdnie->dev, "+%s\n", __func__);
@@ -818,6 +820,7 @@ void mdnie_late_resume(struct early_suspend *h)
 
 	mdnie->bd_enable = TRUE;
 	dev_info(mdnie->dev, "-%s\n", __func__);
+#endif
 	for (i = 0; i < 5; i++) {
 		if (negative[i].enable)
 			dev_info(mdnie->dev, "pid=%d, %s, %s\n", negative[i].pid, negative[i].comm, negative[i].time);

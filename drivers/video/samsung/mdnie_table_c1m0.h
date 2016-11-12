@@ -4,7 +4,7 @@
 #include "mdnie.h"
 
 
-static const unsigned short tune_cyanogenmod[] = {
+static unsigned short tune_cyanogenmod[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x0088, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -24,7 +24,7 @@ static const unsigned short tune_cyanogenmod[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_dynamic_gallery[] = {
+static unsigned short tune_dynamic_gallery[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -55,7 +55,7 @@ static const unsigned short tune_dynamic_gallery[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_dynamic_ui[] = {
+static unsigned short tune_dynamic_ui[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -86,7 +86,7 @@ static const unsigned short tune_dynamic_ui[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_dynamic_video[] = {
+static unsigned short tune_dynamic_video[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -129,7 +129,7 @@ static const unsigned short tune_dynamic_video[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_dynamic_vt[] = {
+static unsigned short tune_dynamic_vt[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008e, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0005, /*FA cs1 | de8 dnr4 hdr2 fa1*/
@@ -165,7 +165,7 @@ static const unsigned short tune_dynamic_vt[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_movie_gallery[] = {
+static unsigned short tune_movie_gallery[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00a0, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -196,7 +196,7 @@ static const unsigned short tune_movie_gallery[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_movie_ui[] = {
+static unsigned short tune_movie_ui[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00a0, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -227,7 +227,7 @@ static const unsigned short tune_movie_ui[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_movie_video[] = {
+static unsigned short tune_movie_video[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00a0, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -268,7 +268,7 @@ static const unsigned short tune_movie_video[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_movie_vt[] = {
+static unsigned short tune_movie_vt[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ae, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0005, /*FA cs1 | de8 dnr4 hdr2 fa1*/
@@ -316,7 +316,7 @@ static const unsigned short tune_movie_vt[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_standard_gallery[] = {
+static unsigned short tune_standard_gallery[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -347,7 +347,7 @@ static const unsigned short tune_standard_gallery[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_standard_ui[] = {
+static unsigned short tune_standard_ui[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -378,7 +378,7 @@ static const unsigned short tune_standard_ui[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_standard_video[] = {
+static unsigned short tune_standard_video[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -421,7 +421,7 @@ static const unsigned short tune_standard_video[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_standard_vt[] = {
+static unsigned short tune_standard_vt[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x008e, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0005, /*FA cs1 | de8 dnr4 hdr2 fa1*/
@@ -457,7 +457,7 @@ static const unsigned short tune_standard_vt[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_natural_gallery[] = {
+static unsigned short tune_natural_gallery[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ac, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -500,7 +500,7 @@ static const unsigned short tune_natural_gallery[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_natural_ui[] = {
+static unsigned short tune_natural_ui[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ac, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -543,7 +543,7 @@ static const unsigned short tune_natural_ui[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_natural_video[] = {
+static unsigned short tune_natural_video[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ac, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -586,7 +586,7 @@ static const unsigned short tune_natural_video[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_natural_vt[] = {
+static unsigned short tune_natural_vt[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ae, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0005, /*FA cs1 | de8 dnr4 hdr2 fa1*/
@@ -634,7 +634,7 @@ static const unsigned short tune_natural_vt[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_camera[] = {
+static unsigned short tune_camera[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x000c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -654,7 +654,7 @@ static const unsigned short tune_camera[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_camera_outdoor[] = {
+static unsigned short tune_camera_outdoor[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x040c, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0030, 0x0000, /*FA cs1 de8 hdr2 fa1*/
@@ -677,7 +677,7 @@ static const unsigned short tune_camera_outdoor[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_cold[] = {
+static unsigned short tune_cold[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ec, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0000, 0x0001, /*BANK 1*/
@@ -688,7 +688,7 @@ static const unsigned short tune_cold[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_cold_outdoor[] = {
+static unsigned short tune_cold_outdoor[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x04ec, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0000, 0x0001, /*BANK 1*/
@@ -701,7 +701,7 @@ static const unsigned short tune_cold_outdoor[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_normal_outdoor[] = {
+static unsigned short tune_normal_outdoor[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x04ac, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0000, 0x0001, /*BANK 1*/
@@ -711,7 +711,7 @@ static const unsigned short tune_normal_outdoor[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_warm[] = {
+static unsigned short tune_warm[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x00ec, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0000, 0x0001, /*BANK 1*/
@@ -722,7 +722,7 @@ static const unsigned short tune_warm[] = {
 	END_SEQ, 0x0000,
 };
 
-static const unsigned short tune_warm_outdoor[] = {
+static unsigned short tune_warm_outdoor[] = {
 	0x0000, 0x0000, /*BANK 0*/
 	0x0008, 0x04ec, /*Dither8 UC4 ABC2 CP1 | CC8 MCM4 SCR2 SCC1 | CS8 DE4 DNR2 HDR1*/
 	0x0000, 0x0001, /*BANK 1*/

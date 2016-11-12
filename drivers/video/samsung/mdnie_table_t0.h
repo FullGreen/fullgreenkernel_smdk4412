@@ -694,8 +694,8 @@ struct mdnie_tunning_info tunning_table[CABC_MAX][MODE_MAX][SCENARIO_MAX] = {
 };
 
 struct mdnie_tunning_info camera_table[OUTDOOR_MAX] = {
-	{"CAMERA",		(unsigned short *)tune_camera},
-	{"CAMERA_OUTDOOR",	(unsigned short *)tune_camera_outdoor},
+	{"CAMERA",		(unsigned short *)&tune_camera},
+	{"CAMERA_OUTDOOR",	(unsigned short *)&tune_camera_outdoor},
 };
 
 #endif/* __MDNIE_TABLE_H__ */
