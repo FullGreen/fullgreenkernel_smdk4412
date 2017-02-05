@@ -1,0 +1,43 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+bool() {
+  [ `$BB cat $1` == "Y" ] && $BB echo "1";
+  [ `$BB cat $1` == "N" ] && $BB echo "0";
+}
+
+cat << CTAG
+{
+    sections: [
+		`if [ -n "$UKM" ]; then
+			. $UKM/config.json.generate.info
+			$BB echo ','
+			. $UKM/config.json.generate.battery
+			$BB echo ','
+			. $UKM/config.json.generate.cpu
+			$BB echo ','
+			. $UKM/config.json.generate.cpu.governor.pegasusq
+			$BB echo ','
+			. $UKM/config.json.generate.cpu.governor.zzmoove
+			$BB echo ','
+			. $UKM/config.json.generate.fullgreenkernel
+			$BB echo ','
+			. $UKM/config.json.generate.gpu
+			$BB echo ','
+			. $UKM/config.json.generate.io
+			$BB echo ','
+			. $UKM/config.json.generate.leds
+			$BB echo ','
+			. $UKM/config.json.generate.memory
+			$BB echo ','
+			. $UKM/config.json.generate.screen
+			$BB echo ','
+			. $UKM/config.json.generate.sound
+			$BB echo ','
+			. $UKM/config.json.generate.system
+		else
+			. $UKM/config.json.generate.error
+		fi`
+    ]
+}
+CTAG
