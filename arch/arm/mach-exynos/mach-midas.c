@@ -301,7 +301,10 @@ static void touchkey_init_hw(void)
 	defined(CONFIG_TARGET_LOCALE_KOR)
 	/* do nothing */
 #elif defined(CONFIG_MACH_C1)
-#if defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+	if (system_rev < 5)
+		return;
+#elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 	if (system_rev < 8)
 		return;
 #elif defined(CONFIG_MACH_C1_KOR_LGT)
@@ -324,7 +327,7 @@ static void touchkey_init_hw(void)
 	defined(CONFIG_MACH_T0) || \
 	defined(CONFIG_MACH_BAFFIN)
 	gpio_request(GPIO_3_TOUCH_EN, "gpio_3_touch_en");
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	gpio_request(GPIO_3_TOUCH_LDO_EN, "gpio_3_touch_ldo_en");
 #endif
 #endif
@@ -351,8 +354,7 @@ static int touchkey_suspend(void)
 		return 0;
 	if (regulator_is_enabled(regulator))
 		regulator_force_disable(regulator);
-
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	gpio_request(GPIO_3_TOUCH_LDO_EN, "gpio_3_touch_ldo_en");
 	gpio_direction_output(GPIO_3_TOUCH_LDO_EN, 0);
 #endif
@@ -373,7 +375,7 @@ static int touchkey_resume(void)
 	if (IS_ERR(regulator))
 		return 0;
 	regulator_enable(regulator);
-	#if defined(CONFIG_MACH_C1_KOR_LGT)
+	#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	gpio_request(GPIO_3_TOUCH_LDO_EN, "gpio_3_touch_ldo_en");
 	gpio_direction_output(GPIO_3_TOUCH_LDO_EN, 1);
 	#endif
@@ -1578,7 +1580,12 @@ static struct samsung_battery_platform_data samsung_battery_pdata = {
 
 	.cb_det_src = CABLE_DET_CHARGER,
 #if defined(CONFIG_TARGET_LOCALE_KOR)
-#if defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+	.overheat_stop_temp = 630,
+	.overheat_recovery_temp = 430,
+	.freeze_stop_temp = -70,
+	.freeze_recovery_temp = 0,
+#elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 	.overheat_stop_temp = 640,
 	.overheat_recovery_temp = 429,
 	.freeze_stop_temp = -70,

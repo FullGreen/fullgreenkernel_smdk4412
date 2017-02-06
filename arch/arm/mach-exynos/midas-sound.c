@@ -251,7 +251,7 @@ static struct wm8994_drc_cfg drc_value[] = {
 		.regs[3] = 0x0210,
 		.regs[4] = 0x0000,
 	},
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{
 		.name = "voice call DRC",
 		.regs[0] = 0x008c,
@@ -356,7 +356,7 @@ static struct fm34_platform_data fm34_we395_pdata = {
 	.gpio_bp = GPIO_FM34_BYPASS,
 	.set_mclk = midas_snd_set_mclk,
 };
-#ifdef CONFIG_MACH_C1_KOR_LGT
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 static struct fm34_platform_data fm34_we395_pdata_rev05 = {
 	.gpio_pwdn = GPIO_FM34_PWDN,
 	.gpio_rst = GPIO_FM34_RESET_05,
@@ -372,7 +372,7 @@ static struct i2c_board_info i2c_2mic[] __initdata = {
 	},
 };
 
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 static struct i2c_gpio_platform_data gpio_i2c_fm34 = {
 	.sda_pin = GPIO_FM34_SDA,
 	.scl_pin = GPIO_FM34_SCL,
@@ -504,7 +504,8 @@ struct exynos_sound_platform_data midas_sound_pdata __initdata = {
 #endif
 
 static struct platform_device *midas_sound_devices[] __initdata = {
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 #ifdef CONFIG_FM34_WE395
 	&s3c_device_fm34,
 #endif
@@ -575,8 +576,7 @@ void __init midas_sound_init(void)
 #ifdef CONFIG_FM34_WE395
 	midas_snd_set_mclk(true, false);
 	SET_PLATDATA_2MIC(NULL);
-
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	if (system_rev > 5)
 		i2c_2mic[0].platform_data = &fm34_we395_pdata_rev05;
 #endif

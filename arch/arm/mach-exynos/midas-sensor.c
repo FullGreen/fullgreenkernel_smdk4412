@@ -162,6 +162,13 @@ static int stm_get_position(void)
 		position = 0; /* top/upper-left */
 	else
 		position = 2; /* top/lower-right */
+#elif defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+	if (system_rev >= 6)
+		position = 2; /* top/lower-right */
+	else if (system_rev == 5)
+		position = 4; /* bottom/upper-left */
+	else
+		position = 3; /* top/lower-left */
 #elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 	if (system_rev >= 6)
 		position = 6; /* bottom/lower-right */

@@ -167,6 +167,11 @@ config MACH_C1_KOR_LGT
 	bool "LG U+"
 endchoice
 
+config MACH_C1_SKT_FOR_LGT
+	bool "Build SKT Kernel for LGT Hardware"
+	depends on MACH_C1_KOR_SKT
+	select FM34_WE395
+
 choice
 	prompt "M0 KOR Target Carrier"
 	depends on MACH_M0 && TARGET_LOCALE_KOR
