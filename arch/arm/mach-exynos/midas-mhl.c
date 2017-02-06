@@ -51,11 +51,10 @@ static void sii9234_cfg_gpio(void)
 	s3c_gpio_cfgpin(GPIO_MHL_RST, S3C_GPIO_OUTPUT);
 	s3c_gpio_setpull(GPIO_MHL_RST, S3C_GPIO_PULL_NONE);
 	gpio_set_value(GPIO_MHL_RST, GPIO_LEVEL_LOW);
-
 #if !defined(CONFIG_MACH_C1_KOR_LGT) && !defined(CONFIG_SAMSUNG_MHL_9290)
 #if !defined(CONFIG_MACH_P4NOTE) && !defined(CONFIG_MACH_T0) && \
 	!defined(CONFIG_MACH_M3) && !defined(CONFIG_MACH_SLP_T0_LTE) && \
-	!defined(CONFIG_MACH_KONA)
+	!defined(CONFIG_MACH_KONA) && !defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	s3c_gpio_cfgpin(GPIO_MHL_SEL, S3C_GPIO_OUTPUT);
 	s3c_gpio_setpull(GPIO_MHL_SEL, S3C_GPIO_PULL_NONE);
 	gpio_set_value(GPIO_MHL_SEL, GPIO_LEVEL_LOW);

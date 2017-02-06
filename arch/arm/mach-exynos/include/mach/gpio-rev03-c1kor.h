@@ -148,7 +148,7 @@ extern void midas_config_sleep_gpio_table(void);
 #define GPIO_3_TOUCH_INT	EXYNOS4212_GPJ0(3)
 #define GPIO_OK_KEY_ANDROID	EXYNOS4_GPX0(1)
 #define GPIO_3_TOUCH_EN	EXYNOS4212_GPM0(0)
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 #define GPIO_3_TOUCH_LDO_EN EXYNOS4212_GPM3(4)
 #endif
 
@@ -185,8 +185,7 @@ extern void midas_config_sleep_gpio_table(void);
 #define GPIO_ISP_RXD		EXYNOS4212_GPM4(6)
 
 #define GPIO_TA_EN		EXYNOS4_GPL2(2)
-
-#if !defined(CONFIG_MACH_C1_KOR_LGT)
+#if !defined(CONFIG_MACH_C1_KOR_LGT) && !defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 #define GPIO_MHL_SEL		EXYNOS4_GPL0(3)
 #endif
 
@@ -284,7 +283,6 @@ extern void midas_config_sleep_gpio_table(void);
 
 #define GPIO_LTE_ACTIVE		EXYNOS4_GPX1(6)
 #define LTE_ACTIVE_IRQ		IRQ_EINT(14)	/* IRQ of GPX1[6] */
-
 #if defined(CONFIG_MACH_C1_KOR_LGT)
 #define GPIO_CMC_IDPRAM_INT_00	EXYNOS4_GPX3(3)
 #define CMC_IDPRAM_INT_IRQ_00	IRQ_EINT(27)	/* IRQ of GPX3[3] */
@@ -312,7 +310,6 @@ extern void midas_config_sleep_gpio_table(void);
 
 /* Definitions for PDA_ACTIVE for CMC221 & CBP7.2 */
 #define GPIO_PDA_ACTIVE		EXYNOS4_GPF1(6)
-
 #if defined(CONFIG_MACH_C1_KOR_LGT)
 /* Definitions for CBP7.2 */
 #define GPIO_CBP_PMIC_PWRON	EXYNOS4212_GPM0(6)
@@ -329,7 +326,6 @@ extern void midas_config_sleep_gpio_table(void);
 
 #define GPIO_CBP_BOOT_SEL	EXYNOS4212_GPM0(5)
 #endif
-
 #if defined(CONFIG_TDMB) || defined(CONFIG_TDMB_MODULE)
 #if defined(CONFIG_MACH_C1_KOR_LGT)
 #define GPIO_TDMB_EN		EXYNOS4_GPC0(0)

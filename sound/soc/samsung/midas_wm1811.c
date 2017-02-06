@@ -1059,7 +1059,7 @@ static int midas_wm1811_aif2_hw_params(struct snd_pcm_substream *substream,
 	}
 
 #if defined(CONFIG_LTE_MODEM_CMC221) || defined(CONFIG_MACH_M0_CTC)
-#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_BAFFIN_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_BAFFIN_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	/* Set the codec DAI configuration */
 	if (aif2_mode == 0) {
 		if (kpcs_mode == 1)
@@ -1072,7 +1072,7 @@ static int midas_wm1811_aif2_hw_params(struct snd_pcm_substream *substream,
 				| SND_SOC_DAIFMT_IB_NF
 				| SND_SOC_DAIFMT_CBS_CFS);
 	} else
-#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_BAFFIN_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_BAFFIN_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 		ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_DSP_A
 				| SND_SOC_DAIFMT_IB_NF
 				| SND_SOC_DAIFMT_CBM_CFM);

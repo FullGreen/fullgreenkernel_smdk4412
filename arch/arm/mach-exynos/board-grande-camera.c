@@ -75,7 +75,10 @@ static int __init camera_class_init(void)
 
 subsys_initcall(camera_class_init);
 
-#if defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+#define FRONT_CAM_MCLK_DEVIDED_REVISION	0x04
+#define USE_8M_CAM_SENSOR_CORE_REVISION	0x07
+#elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 #define FRONT_CAM_MCLK_DEVIDED_REVISION	0x06
 #define USE_8M_CAM_SENSOR_CORE_REVISION	0x09
 #elif defined(CONFIG_MACH_C1_KOR_LGT)

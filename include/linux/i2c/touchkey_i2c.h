@@ -147,7 +147,9 @@
 #elif defined(CONFIG_MACH_M0)
 #define  TOUCHKEY_FW_UPDATEABLE_HW_REV  11
 #elif defined(CONFIG_MACH_C1)
-#if defined(CONFIG_MACH_C1_KOR_SKT)\
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+#define  TOUCHKEY_FW_UPDATEABLE_HW_REV  5
+#elif defined(CONFIG_MACH_C1_KOR_SKT)\
 	|| defined(CONFIG_MACH_C1_KOR_KT)
 #define  TOUCHKEY_FW_UPDATEABLE_HW_REV  8
 #elif defined(CONFIG_MACH_C1_KOR_LGT)

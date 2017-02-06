@@ -124,13 +124,15 @@ static unsigned int exynos4_sleep_gpio_table_common[][3] = {
 	{EXYNOS4_GPB(6),   S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},
 	{EXYNOS4_GPB(7),   S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},
 
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPC0(0),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE},
 #else
 	{EXYNOS4_GPC0(0),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_NONE},
 #endif
 	{EXYNOS4_GPC0(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
-#if defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_NONE},
+#elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE},
 #else
 	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_NONE},
@@ -793,13 +795,15 @@ static unsigned int m0_sleep_gpio_table[][3] = {
 	{EXYNOS4_GPB(6),   S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},
 	{EXYNOS4_GPB(7),   S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN},
 
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPC0(0),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE},
 #else
 	{EXYNOS4_GPC0(0),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* REC_PCM_CLK(NC) */
 #endif
 	{EXYNOS4_GPC0(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
-#if defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
+#if defined(CONFIG_MACH_C1_SKT_FOR_LGT)
+	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* REC_PCM_SYNC(NC) */
+#elif defined(CONFIG_MACH_C1_KOR_SKT) || defined(CONFIG_MACH_C1_KOR_KT)
 	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE},
 #else
 	{EXYNOS4_GPC0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* REC_PCM_SYNC(NC) */
@@ -1648,6 +1652,7 @@ static unsigned int c1kor_sleep_gpio_table[][3] = {
 	{EXYNOS4_GPF2(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* MLCD_RST */
 	{EXYNOS4_GPF2(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* AP_CMC_INT */
 	{EXYNOS4_GPF2(3),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* UART_SEL */
+
 #if defined(CONFIG_MACH_C1_KOR_LGT)
 	{EXYNOS4_GPF2(4),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* CP_RST_1.8V */
 #else
@@ -1699,7 +1704,7 @@ static unsigned int c1kor_sleep_gpio_table[][3] = {
 	{EXYNOS4_GPL0(0),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE}, /* USB_HUB_RST */
 	{EXYNOS4_GPL0(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
 	{EXYNOS4_GPL0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPL0(3),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* GPIO_FM34_PWDN */
 #else
 	{EXYNOS4_GPL0(3),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
@@ -1742,8 +1747,7 @@ static unsigned int c1kor_sleep_gpio_table[][3] = {
 	{EXYNOS4_GPY0(4),  S3C_GPIO_SLP_OUT1, S3C_GPIO_PULL_NONE}, /* DPRAM_REN */
 	{EXYNOS4_GPY0(5),  S3C_GPIO_SLP_OUT1, S3C_GPIO_PULL_NONE}, /* DPRAM_WEN */
 #endif
-
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPY1(0),  S3C_GPIO_SLP_OUT1, S3C_GPIO_PULL_NONE}, /* DPRAM_LBN */
 	{EXYNOS4_GPY1(1),  S3C_GPIO_SLP_OUT1, S3C_GPIO_PULL_NONE}, /* DPRAM_UBN */
 #else
@@ -1751,7 +1755,7 @@ static unsigned int c1kor_sleep_gpio_table[][3] = {
 	{EXYNOS4_GPY1(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC */
 #endif
 
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPY1(2),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* GPIO_FM34_BYPASS */
 	{EXYNOS4_GPY1(3),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* GPIO_FM34_RESET */
 #else
@@ -1925,7 +1929,7 @@ static unsigned int c1kor_sleep_gpio_table[][3] = {
  * c1kor Rev0.5 GPIO Sleep Table
  */
 static unsigned int c1kor_sleep_gpio_table_rev05[][3] = {
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPC0(3),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* EARMICBIAS_EN -> NC */
 	{EXYNOS4_GPL0(1),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* NC -> VP_RST_N*/
 	{EXYNOS4_GPL0(2),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* NC -> VP_BP_N */
@@ -1945,7 +1949,7 @@ static unsigned int c1kor_sleep_gpio_table_rev05[][3] = {
 };
 
 static unsigned int c1kor_sleep_gpio_table_rev06[][3] = {
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4_GPL0(1),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* VP_RST_N -> TOUCH_SCL_1.8V */
 	{EXYNOS4_GPL0(2),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* VP_BP_N -> TOUCH_SDA_1.8V*/
 	{EXYNOS4212_GPM0(0),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE}, /* NC -> KEY_LED_EN */
@@ -1953,7 +1957,6 @@ static unsigned int c1kor_sleep_gpio_table_rev06[][3] = {
 	{EXYNOS4_GPY1(3),  S3C_GPIO_SLP_PREV, S3C_GPIO_PULL_NONE}, /* NC -> VP_RST_N */
 #endif
 };
-
 static unsigned int c1kor_sleep_gpio_table_rev07[][3] = {
 	{EXYNOS4_GPF2(3),  S3C_GPIO_SLP_INPUT, S3C_GPIO_PULL_DOWN}, /* NC -> AUTO_DFS */
 #if defined(CONFIG_MACH_C1_KOR_LGT)
@@ -1964,19 +1967,19 @@ static unsigned int c1kor_sleep_gpio_table_rev07[][3] = {
 };
 
 static unsigned int c1kor_sleep_gpio_table_rev08[][3] = {
-#if defined(CONFIG_MACH_C1_KOR_LGT)
+#if defined(CONFIG_MACH_C1_KOR_LGT) || defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4212_GPM0(7),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE}, /* NC -> CAM_SENSOR_CORE_EN */
 #endif
 };
 
 static unsigned int c1kor_sleep_gpio_table_rev09[][3] = {
-#if !defined(CONFIG_MACH_C1_KOR_LGT)
+#if !defined(CONFIG_MACH_C1_KOR_LGT) && !defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4212_GPM0(0),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE}, /* NC -> LED_VDD_EN */
 #endif
 };
 
 static unsigned int c1kor_sleep_gpio_table_rev12[][3] = {
-#if !defined(CONFIG_MACH_C1_KOR_LGT)
+#if !defined(CONFIG_MACH_C1_KOR_LGT) && !defined(CONFIG_MACH_C1_SKT_FOR_LGT)
 	{EXYNOS4212_GPM0(7),  S3C_GPIO_SLP_OUT0, S3C_GPIO_PULL_NONE}, /* NC -> CAM_SENSOR_CORE_EN */
 #endif
 };
